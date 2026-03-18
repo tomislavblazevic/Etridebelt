@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root{
   --bg-start:#fff7fb; /* blush-tinge */
   --bg-end:#eefcf6;   /* soft green */
@@ -14,8 +16,9 @@ body{
   background: radial-gradient(1200px 400px at 10% 10%, rgba(253,164,175,0.08), transparent 10%),
               radial-gradient(1000px 360px at 90% 90%, rgba(6,182,212,0.06), transparent 10%),
               linear-gradient(135deg,var(--bg-start),var(--bg-end));
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   color: #111827;
+  transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
 .container{
@@ -25,6 +28,7 @@ body{
   border-radius:12px;
   padding:24px;
   box-shadow:0 10px 30px rgba(17,24,39,0.08);
+  transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 h1{
@@ -32,6 +36,7 @@ h1{
   margin-bottom:18px;
   font-size:1.75rem;
   letter-spacing:-0.5px;
+  transition: color 0.3s ease-in-out;
 }
 
 .input-group{display:flex;gap:8px}
@@ -40,6 +45,7 @@ h1{
   border-radius:8px;
   border:1px solid #e6e9ef;
   padding:10px 12px;
+  transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .form-control:focus{
@@ -54,6 +60,7 @@ h1{
   color:#fff;
   border-radius:8px;
   padding:8px 14px;
+  transition: background 0.3s ease-in-out;
 }
 
 .btn-primary:hover{transform:translateY(-1px)}
@@ -72,9 +79,22 @@ h1{
 
 .list-group-item span.completed{color:var(--muted);text-decoration:line-through}
 
-.btn-warning{background:linear-gradient(180deg,var(--blush),#fb923c);border:none;color:#fff;border-radius:6px;padding:6px 8px}
-.btn-success{background:linear-gradient(180deg,var(--green),#059669);border:none;color:#fff;border-radius:6px;padding:6px 8px}
-.btn-danger{background:linear-gradient(180deg,#fb7185,#ef4444);border:none;color:#fff;border-radius:6px;padding:6px 8px}
+.btn-warning, .btn-danger, .btn-success {
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+.btn-warning{background:linear-gradient(180deg,var(--blush),#fb923c);}
+.btn-success{background:linear-gradient(180deg,var(--green),#059669);}
+.btn-danger{background:linear-gradient(180deg,#fb7185,#ef4444);}
 
 @media (max-width:640px){
   .container{margin:20px;padding:16px}
@@ -109,9 +129,50 @@ h1{
   color:#111827;padding:10px 12px;border-radius:8px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
 
 
-.list-group-item{transition:transform .14s ease,box-shadow .14s ease}
+.list-group-item{transition:transform .14s ease, box-shadow .14s ease, background 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out}
 .list-group-item:hover{transform:translateY(-4px);box-shadow:0 10px 20px rgba(15,23,42,0.06)}
 .list-group-item.completed{background:linear-gradient(90deg,#ecfeff,#f0f9ff)}
 
 .badge-done{background:linear-gradient(90deg,#10b981,#059669);color:#fff;padding:4px 8px;border-radius:999px;font-size:0.75rem}
 
+/* Dark Mode Styles */
+body.dark-mode {
+  --bg-start: #0d1b2a; /* Deep dark blue */
+  --bg-end: #00001a;   /* Midnight blue */
+  --primary: #818cf8;
+  --muted: #6a7b9e;   /* Muted slate blue */
+  color: #f3f4f6;
+  background: radial-gradient(1200px 400px at 10% 10%, rgba(253,164,175,0.05), transparent 10%),
+              radial-gradient(1000px 360px at 90% 90%, rgba(6,182,212,0.05), transparent 10%),
+              linear-gradient(135deg,var(--bg-start),var(--bg-end));
+}
+
+body.dark-mode .container {
+  background: #1b263b; /* Dark slate blue */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+body.dark-mode .form-control {
+  background: #2a3a52; /* Darker slate blue */
+  border-color: #415a77; /* Steel blue */
+  color: white;
+}
+
+body.dark-mode .list-group-item {
+  background: linear-gradient(180deg, #1b263b, #0d1b2a);
+  border-bottom: 1px solid #415a77;
+  color: #e5e7eb;
+}
+
+body.dark-mode .list-group-item:hover {
+  background: #2a3a52;
+}
+
+body.dark-mode .list-group-item.completed {
+  background: linear-gradient(90deg, #1b263b, #2a3a52);
+  color: #6a7b9e;
+}
+
+body.dark-mode .btn-primary {
+  background: linear-gradient(180deg, var(--primary), #6366f1); /* Indigo/purple gradient for dark mode */
+}

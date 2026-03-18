@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+// @ts-ignore
 import './App.css';
 
 const REACT_API = process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim();
@@ -22,6 +24,27 @@ function App() {
   const [fallbackLocal, setFallbackLocal] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      return savedTheme === 'dark';
+    }
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(prevMode => !prevMode);
+  };
 
   useEffect(() => {
     if (USE_LOCAL_STORAGE) {
@@ -212,7 +235,12 @@ function App() {
           </div>
         </div>
       )}
-      <h1 className="my-4">Todo List</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 className="my-4">Todo List</h1>
+        <button onClick={toggleDarkMode} className="btn btn-primary">
+          {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+        </button>
+      </div>
       <form onSubmit={addTodo} className="mb-3">
         <div className="input-group">
           <input
@@ -254,24 +282,27 @@ function App() {
             <div>
               {editingId === todo.id ? (
                 <button
+                  aria-label="Save todo"
                   onClick={() => saveEdit(todo.id)}
                   className="btn btn-success btn-sm me-2"
                 >
-                  Save
+                  💾
                 </button>
               ) : (
                 <button
+                  aria-label="Edit todo"
                   onClick={() => startEditing(todo.id, todo.text)}
                   className="btn btn-warning btn-sm me-2"
                 >
-                  Edit
+                  ✏️
                 </button>
               )}
               <button
+                aria-label="Delete todo"
                 onClick={() => deleteTodo(todo.id)}
                 className="btn btn-danger btn-sm"
               >
-                Delete
+                🗑️
               </button>
             </div>
           </li>

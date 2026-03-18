@@ -1,9 +1,10 @@
+/* eslint-disable no-restricted-globals */
 /* Improved service worker with runtime caching and offline fallback
-   - Cache static shell (index.html, manifest, todos.json, favicon)
-   - Network-first for API (/todos), with cache fallback
-   - Cache-first for static assets
-   - Provides an offline fallback page for navigation
-   - Supports skipWaiting via postMessage
+  - Cache static shell (index.html, manifest, todos.json, favicon)
+  - Network-first for API (/todos), with cache fallback
+  - Cache-first for static assets
+  - Provides an offline fallback page for navigation
+  - Supports skipWaiting via postMessage
 */
 
 const CACHE_VERSION = 'v2';
@@ -20,19 +21,23 @@ const STATIC_FILES = [
   '/favicon.svg'
 ];
 
-self.addEventListener('install', (event) => {
+/* global self:readonly */
+
+const sw = typeof self !== 'undefined' ? self : this;
+
+sw.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => cache.addAll(STATIC_FILES))
-      .then(() => self.skipWaiting())
+      .then(() => sw.skipWaiting())
   );
 });
 
-self.addEventListener('activate', (event) => {
+sw.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => Promise.all(
       keys.filter((k) => ![STATIC_CACHE, API_CACHE, RUNTIME_CACHE].includes(k))
         .map((k) => caches.delete(k))
-    )).then(() => self.clients.claim())
+    )).then(() => sw.clients.claim())
   );
 });
 
@@ -50,7 +55,7 @@ function fetchWithTimeout(request, timeout = 5000) {
   });
 }
 
-self.addEventListener('fetch', (event) => {
+sw.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -101,9 +106,9 @@ self.addEventListener('fetch', (event) => {
   // Default: let the network handle it
 });
 
-self.addEventListener('message', (event) => {
+sw.addEventListener('message', (event) => {
   if (!event.data) return;
   if (event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
+    sw.skipWaiting();
   }
 });
