@@ -1,0 +1,25 @@
+{
+  "name": "etridebelt",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000E\u0000t\u0000r\u0000i\u0000d\u0000e\u0000b\u0000e\u0000l\u0000t\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomislavblazevic/Etridebelt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tomislavblazevic/Etridebelt/issues"
+  },
+  "homepage": "https://github.com/tomislavblazevic/Etridebelt#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

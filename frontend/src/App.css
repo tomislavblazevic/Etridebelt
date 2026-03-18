@@ -1,0 +1,31 @@
+body {
+  background-color: #f0f8ff; 
+}
+
+.container {
+  max-width: 600px;
+  margin-top: 50px;
+}
+
+h1 {
+  color: #007bff; 
+}
+
+.btn-primary {
+  background-color: #28a745; 
+  border-color: #28a745;
+}
+
+.btn-primary:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+.list-group-item {
+  background-color: #ffffff;
+}
+
+.form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
