@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/Etridebelt/static/css/main.6a3fa8ce.css",
-    "main.js": "/Etridebelt/static/js/main.6716a6a7.js",
+    "main.css": "/Etridebelt/static/css/main.7e4789bb.css",
+    "main.js": "/Etridebelt/static/js/main.a54fdfeb.js",
     "index.html": "/Etridebelt/index.html",
-    "main.6a3fa8ce.css.map": "/Etridebelt/static/css/main.6a3fa8ce.css.map",
-    "main.6716a6a7.js.map": "/Etridebelt/static/js/main.6716a6a7.js.map"
+    "main.7e4789bb.css.map": "/Etridebelt/static/css/main.7e4789bb.css.map",
+    "main.a54fdfeb.js.map": "/Etridebelt/static/js/main.a54fdfeb.js.map"
   },
   "entrypoints": [
-    "static/css/main.6a3fa8ce.css",
-    "static/js/main.6716a6a7.js"
+    "static/css/main.7e4789bb.css",
+    "static/js/main.a54fdfeb.js"
   ]
 }
