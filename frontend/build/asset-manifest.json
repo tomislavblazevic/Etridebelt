@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Etridebelt/static/css/main.6a3fa8ce.css",
+    "main.js": "/Etridebelt/static/js/main.6716a6a7.js",
+    "index.html": "/Etridebelt/index.html",
+    "main.6a3fa8ce.css.map": "/Etridebelt/static/css/main.6a3fa8ce.css.map",
+    "main.6716a6a7.js.map": "/Etridebelt/static/js/main.6716a6a7.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6a3fa8ce.css",
+    "static/js/main.6716a6a7.js"
+  ]
+}

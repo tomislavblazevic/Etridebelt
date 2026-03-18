@@ -19,8 +19,6 @@ function App() {
   const [text, setText] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
-  const [fallbackLocal, setFallbackLocal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (USE_LOCAL_STORAGE) {
@@ -40,38 +38,22 @@ function App() {
       }).catch(() => setTodos([]));
       return;
     }
-
     axios.get<Todo[]>(API_URL).then((response) => {
       setTodos(response.data as Todo[]);
     }).catch(() => {
-      // Backend not reachable: fall back to localStorage and inform the user
-      setErrorMessage('Backend unavailable — using localStorage fallback');
-      setFallbackLocal(true);
-      const stored = localStorage.getItem('todos');
-      if (stored) {
-        try {
-          setTodos(JSON.parse(stored) as Todo[]);
-          return;
-        } catch (e) {
-          // fall through to fetch static file
-        }
-      }
-      axios.get<Todo[]>(`${process.env.PUBLIC_URL || ''}/todos.json`).then((response) => {
-        setTodos(response.data as Todo[]);
-        localStorage.setItem('todos', JSON.stringify(response.data));
-      }).catch(() => setTodos([]));
+      setTodos([]);
     });
   }, []);
 
   const persist = (nextTodos: Todo[]) => {
     setTodos(nextTodos);
-    if (USE_LOCAL_STORAGE || fallbackLocal) localStorage.setItem('todos', JSON.stringify(nextTodos));
+    if (USE_LOCAL_STORAGE) localStorage.setItem('todos', JSON.stringify(nextTodos));
   };
 
   const addTodo = (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
-    if (USE_LOCAL_STORAGE || fallbackLocal) {
+    if (USE_LOCAL_STORAGE) {
       const next: Todo = { id: Date.now(), text, completed: false };
       persist([...todos, next]);
       setText('');
@@ -80,27 +62,16 @@ function App() {
     axios.post<Todo>(API_URL, { text }).then((response) => {
       setTodos([...todos, response.data]);
       setText('');
-    }).catch(() => {
-      // If POST fails, fallback to local storage and notify
-      setErrorMessage('Failed to reach backend; saved locally instead');
-      setFallbackLocal(true);
-      const next: Todo = { id: Date.now(), text, completed: false };
-      persist([...todos, next]);
-      setText('');
     });
   };
 
   const deleteTodo = (id: number) => {
-    if (USE_LOCAL_STORAGE || fallbackLocal) {
+    if (USE_LOCAL_STORAGE) {
       persist(todos.filter((todo) => todo.id !== id));
       return;
     }
     axios.delete(`${API_URL}/${id}`).then(() => {
       setTodos(todos.filter((todo) => todo.id !== id));
-    }).catch(() => {
-      setErrorMessage('Failed to reach backend; delete applied locally');
-      setFallbackLocal(true);
-      persist(todos.filter((todo) => todo.id !== id));
     });
   };
 
@@ -110,7 +81,7 @@ function App() {
   };
 
   const saveEdit = (id: number) => {
-    if (USE_LOCAL_STORAGE || fallbackLocal) {
+    if (USE_LOCAL_STORAGE) {
       persist(todos.map((todo) => (todo.id === id ? { ...todo, text: editText } : todo)));
       setEditingId(null);
       setEditText('');
@@ -122,17 +93,11 @@ function App() {
       );
       setEditingId(null);
       setEditText('');
-    }).catch(() => {
-      setErrorMessage('Failed to reach backend; edit saved locally');
-      setFallbackLocal(true);
-      persist(todos.map((todo) => (todo.id === id ? { ...todo, text: editText } : todo)));
-      setEditingId(null);
-      setEditText('');
     });
   };
 
   const toggleCompleted = (id: number, completed: boolean) => {
-    if (USE_LOCAL_STORAGE || fallbackLocal) {
+    if (USE_LOCAL_STORAGE) {
       persist(todos.map((todo) => (todo.id === id ? { ...todo, completed: !completed } : todo)));
       return;
     }
@@ -140,46 +105,12 @@ function App() {
         setTodos(
             todos.map((todo) => (todo.id === id ? response.data : todo))
         );
-    }).catch(() => {
-      setErrorMessage('Failed to reach backend; change applied locally');
-      setFallbackLocal(true);
-      persist(todos.map((todo) => (todo.id === id ? { ...todo, completed: !completed } : todo)));
-    });
-  };
-
-  const retryConnection = () => {
-    if (!API_URL) {
-      setErrorMessage('No backend URL configured to retry');
-      return;
-    }
-    setErrorMessage('Retrying connection to backend...');
-    axios.get<Todo[]>(API_URL).then((response) => {
-      setTodos(response.data as Todo[]);
-      setFallbackLocal(false);
-      setErrorMessage(null);
-    }).catch(() => {
-      setErrorMessage('Retry failed — backend still unreachable');
     });
   };
 
 
   return (
     <div className="container">
-      {errorMessage && (
-        <div className="alert-fallback" role="alert">
-          <div className="alert-text">{errorMessage}</div>
-          <div className="alert-actions">
-            {API_URL && (
-              <button type="button" className="btn-retry" onClick={retryConnection}>
-                Retry
-              </button>
-            )}
-            <button type="button" className="btn-dismiss" onClick={() => setErrorMessage(null)}>
-              Dismiss
-            </button>
-          </div>
-        </div>
-      )}
       <h1 className="my-4">Todo List</h1>
       <form onSubmit={addTodo} className="mb-3">
         <div className="input-group">

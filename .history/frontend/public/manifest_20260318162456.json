@@ -1,0 +1,15 @@
+{
+  "short_name": "Etridebelt",
+  "name": "Etridebelt Todo App",
+  "icons": [
+    {
+      "src": "%PUBLIC_URL%/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#4f46e5",
+  "background_color": "#ffffff"
+}

@@ -147,37 +147,12 @@ function App() {
     });
   };
 
-  const retryConnection = () => {
-    if (!API_URL) {
-      setErrorMessage('No backend URL configured to retry');
-      return;
-    }
-    setErrorMessage('Retrying connection to backend...');
-    axios.get<Todo[]>(API_URL).then((response) => {
-      setTodos(response.data as Todo[]);
-      setFallbackLocal(false);
-      setErrorMessage(null);
-    }).catch(() => {
-      setErrorMessage('Retry failed — backend still unreachable');
-    });
-  };
-
 
   return (
     <div className="container">
       {errorMessage && (
         <div className="alert-fallback" role="alert">
-          <div className="alert-text">{errorMessage}</div>
-          <div className="alert-actions">
-            {API_URL && (
-              <button type="button" className="btn-retry" onClick={retryConnection}>
-                Retry
-              </button>
-            )}
-            <button type="button" className="btn-dismiss" onClick={() => setErrorMessage(null)}>
-              Dismiss
-            </button>
-          </div>
+          {errorMessage}
         </div>
       )}
       <h1 className="my-4">Todo List</h1>
