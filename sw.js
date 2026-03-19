@@ -21,6 +21,7 @@ const STATIC_FILES = [
   '/favicon.svg'
 ];
 
+// eslint-disable-next-line no-redeclare
 /* global self:readonly */
 
 const sw = typeof self !== 'undefined' ? self : this;
