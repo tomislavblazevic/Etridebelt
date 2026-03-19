@@ -2,19 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <link rel="icon" href="favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Offline</title>
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff7fb" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1e1e1e" />
+    <meta name="theme-color" content="#4f46e5" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="favicon.svg" />
+    <title>Offline - Todo App</title>
     <style>
-      body{font-family:Arial,Helvetica,sans-serif;background:#f8fafc;color:#0f172a;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
-      .card{background:white;padding:28px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.08);max-width:540px;text-align:center}
+      body{font-family:Arial,Helvetica,sans-serif;background:#f8fafc;color:#0f172a;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;transition:background-color 0.3s, color 0.3s}
+      .card{background:white;padding:28px;border-radius:12px;box-shadow:0 8px 24px rgba(2,6,23,0.08);max-width:540px;text-align:center;transition:background-color 0.3s}
       h1{color:#4f46e5;margin:0 0 8px}
       p{color:#475569}
+      
+      /* Dark mode support matching index.html */
+      html.dark body { background-color: #1e1e1e; color: #ffffff; }
+      html.dark .card { background-color: #2d2d2d; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+      html.dark h1 { color: #818cf8; }
+      html.dark p { color: #cbd5e1; }
+
+      .btn-retry { margin-top: 20px; padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: opacity 0.2s; }
+      .btn-retry:hover { opacity: 0.9; }
     </style>
   </head>
   <body>
     <div class="card">
       <h1>You're offline</h1>
       <p>The app is not connected to the network. Some features may be unavailable, but you can still view and edit local todos.</p>
+      <button class="btn-retry" onclick="window.location.reload()">Retry Connection</button>
     </div>
+    <script>
+      // Immediately apply the correct theme to avoid flash of wrong color
+      (function() {
+        var stored = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (!stored && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </body>
 </html>
