@@ -21,7 +21,6 @@ const STATIC_FILES = [
   '/favicon.svg'
 ];
 
-// eslint-disable-next-line no-redeclare
 /* global self:readonly */
 
 const sw = typeof self !== 'undefined' ? self : this;
@@ -59,6 +58,12 @@ function fetchWithTimeout(request, timeout = 5000) {
 sw.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Security: Only handle GET requests for caching. 
+  // This prevents state-changing requests (POST, PUT, DELETE) from being cached.
+  if (request.method !== 'GET') {
+    return;
+  }
 
   // API requests to /todos -> network-first, fallback to cache
   if (url.pathname.startsWith('/todos')) {
