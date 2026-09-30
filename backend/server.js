@@ -119,7 +119,7 @@ function verifyPassword(password, encoded) {
 
 function publicUser(user) { return { id: user.id, email: user.email, createdAt: user.createdAt }; }
 function sessionCookieOptions() {
-  return { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax', maxAge: sessionMaxAge, path: '/' };
+  return { httpOnly: true, secure: isProduction, sameSite: 'lax', maxAge: sessionMaxAge, path: '/' };
 }
 
 function currentUser(req) {
@@ -140,7 +140,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.get('/csrf', (req, res) => {
   const token = crypto.randomBytes(32).toString('hex');
-  res.cookie('_csrf', token, { httpOnly: false, secure: isProduction, sameSite: isProduction ? 'none' : 'lax', maxAge: 60 * 60 * 1000, path: '/' });
+  res.cookie('_csrf', token, { httpOnly: false, secure: isProduction, sameSite: 'lax', maxAge: 60 * 60 * 1000, path: '/' });
   res.set('Cache-Control', 'no-store');
   res.json({ csrfToken: token });
 });
@@ -208,7 +208,7 @@ app.post('/auth/logout', limiter(20, 60_000), validateCsrf, async (req, res, nex
     const token = req.cookies.session;
     sessions = sessions.filter((item) => item.token !== token);
     await persistJson(sessionsFile, sessions);
-    res.clearCookie('session', { httpOnly: true, secure: isProduction, sameSite: isProduction ? 'none' : 'lax', path: '/' });
+    res.clearCookie('session', { httpOnly: true, secure: isProduction, sameSite: 'lax', path: '/' });
     return res.status(204).send();
   } catch (error) { return next(error); }
 });
