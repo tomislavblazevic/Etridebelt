@@ -1,0 +1,10 @@
+{
+  "name": "Etridebelt Todo",
+  "short_name": "Etridebelt",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "theme_color": "#4f46e5",
+  "background_color": "#f5f7fb",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
