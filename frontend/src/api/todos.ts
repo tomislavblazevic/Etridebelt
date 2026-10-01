@@ -15,17 +15,30 @@ async function ensureCsrf(): Promise<string> {
   return csrfToken;
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, retry = true): Promise<T> {
   if (!API_URL) throw new Error('API is not configured');
   const method = (options.method || 'GET').toUpperCase();
   const headers = new Headers({ Accept: 'application/json', 'Content-Type': 'application/json', ...options.headers });
-  if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') headers.set('X-CSRF-Token', await ensureCsrf());
-  const response = await fetch(`${API_URL}${path}`, { ...options, credentials: 'include', headers });
-  if (response.status === 403 && method !== 'GET' && method !== 'HEAD') csrfToken = null;
+  if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS') {
+    headers.set('X-CSRF-Token', await ensureCsrf());
+  }
+
+  const response = await fetch(`${API_URL}${path}`, {
+    ...options,
+    credentials: 'include',
+    headers
+  });
+
+  if (response.status === 403 && method !== 'GET' && method !== 'HEAD' && retry) {
+    csrfToken = null;
+    return request<T>(path, options, false);
+  }
+
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { message?: string } | null;
     throw new Error(body?.message || `Request failed (${response.status})`);
   }
+
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
