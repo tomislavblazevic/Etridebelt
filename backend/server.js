@@ -138,21 +138,46 @@ function requireAuth(req, res, next) {
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
+const csrfSecret = process.env.CSRF_SECRET || (!isProduction ? 'development-only-csrf-secret' : null);
+if (!csrfSecret) throw new Error('CSRF_SECRET is required in production');
+
+function createCsrfToken() {
+  const timestamp = Date.now().toString();
+  const nonce = crypto.randomBytes(16).toString('hex');
+  const payload = `${timestamp}.${nonce}`;
+  const signature = crypto.createHmac('sha256', csrfSecret).update(payload).digest('hex');
+  return `${payload}.${signature}`;
+}
+
+function validateCsrf(req, res, next) {
+  const token = req.get('X-CSRF-Token');
+  if (!token) return res.status(403).json({ message: 'Invalid CSRF token' });
+
+  const parts = token.split('.');
+  if (parts.length !== 3) return res.status(403).json({ message: 'Invalid CSRF token' });
+
+  const [timestamp, nonce, signature] = parts;
+  const issuedAt = Number(timestamp);
+
+  if (!Number.isFinite(issuedAt) || Date.now() - issuedAt > 60 * 60 * 1000 || issuedAt > Date.now() + 60 * 1000) {
+    return res.status(403).json({ message: 'Invalid CSRF token' });
+  }
+
+  const payload = `${timestamp}.${nonce}`;
+  const expected = crypto.createHmac('sha256', csrfSecret).update(payload).digest('hex');
+
+  if (signature.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+    return res.status(403).json({ message: 'Invalid CSRF token' });
+  }
+
+  return next();
+}
+
 app.get('/csrf', (req, res) => {
-  const token = crypto.randomBytes(32).toString('hex');
-  res.cookie('_csrf', token, { httpOnly: false, secure: isProduction, sameSite: 'lax', maxAge: 60 * 60 * 1000, path: '/' });
+  const token = createCsrfToken();
   res.set('Cache-Control', 'no-store');
   res.json({ csrfToken: token });
 });
-
-function validateCsrf(req, res, next) {
-  const cookieToken = req.cookies._csrf;
-  const headerToken = req.get('X-CSRF-Token');
-  if (!cookieToken || !headerToken || cookieToken.length !== headerToken.length || !crypto.timingSafeEqual(Buffer.from(cookieToken), Buffer.from(headerToken))) {
-    return res.status(403).json({ message: 'Invalid CSRF token' });
-  }
-  return next();
-}
 
 function validateTodoPayload(body, { partial = false } = {}) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return 'Request body must be an object.';
