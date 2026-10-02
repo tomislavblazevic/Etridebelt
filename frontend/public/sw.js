@@ -1,5 +1,5 @@
 /* Etridebelt service worker: cache app shell, never cache mutations or API responses. */
-const VERSION = 'v3';
+const VERSION = 'v4';
 const STATIC_CACHE = `etridebelt-static-${VERSION}`;
 const RUNTIME_CACHE = `etridebelt-runtime-${VERSION}`;
 const APP_SHELL = ['./', './index.html', './offline.html', './manifest.json', './favicon.svg', './todos.json'];
@@ -21,6 +21,9 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  // Never intercept or cache API requests.
+  if (url.pathname.startsWith('/api/')) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(
