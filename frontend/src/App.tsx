@@ -186,6 +186,20 @@ const refreshFromServer = useCallback(async () => {
     return true;
   } catch (error) {
     console.error('Unable to refresh todos from server:', error);
+
+    if (
+      error instanceof Error &&
+      error.message.includes('Authentication required')
+    ) {
+      setMessage(
+        'Sesija je istekla. Prijavite se ponovno kako biste dohvatili najnovije zadatke s drugih uređaja.',
+      );
+    } else {
+      setMessage(
+        'Server trenutno nije dostupan. Promjene su spremljene na ovom uređaju i sinkronizirat će se automatski.',
+      );
+    }
+
     return false;
   }
 }, [syncQueue, user]);
