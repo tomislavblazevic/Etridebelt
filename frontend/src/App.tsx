@@ -86,11 +86,11 @@ function App() {
     return [];
   }, []);
 
-const syncQueue = useCallback(async () => {
-  if (!apiEnabled || !navigator.onLine) return;
+const syncQueue = useCallback(async (): Promise<boolean> => {
+  if (!apiEnabled || !navigator.onLine) return true;
 
   const queue = await getQueue();
-  if (!queue.length) return;
+  if (!queue.length) return true;
 
   setSyncing(true);
 
@@ -101,6 +101,7 @@ const syncQueue = useCallback(async () => {
       try {
         if (operation.type === 'create') {
           const remote = await createTodo(operation.todo);
+
           await deleteLocalTodo(operation.todo.id);
           await putTodo(remote);
 
@@ -111,6 +112,7 @@ const syncQueue = useCallback(async () => {
           );
         } else if (operation.type === 'update') {
           const remote = await updateTodo(operation.todo);
+
           await putTodo(remote);
 
           setTodos((current) =>
@@ -133,39 +135,57 @@ const syncQueue = useCallback(async () => {
         console.error('Sync operation failed:', operation, error);
       }
     }
+
+    return !failed;
   } finally {
     setSyncing(false);
-  }
-
-  if (failed) {
-    setMessage('Neke promjene još čekaju sinkronizaciju.');
-  } else {
-    setMessage(null);
   }
 }, []);
 
 const refreshFromServer = useCallback(async () => {
   if (!apiEnabled || !navigator.onLine || !user) return false;
 
-  let syncFailed = false;
-
-  try {
-    await syncQueue();
-  } catch {
-    syncFailed = true;
-  }
+  const syncSucceeded = await syncQueue();
+  const remainingQueue = await getQueue();
 
   try {
     const remote = await fetchTodos();
-    await replaceTodos(remote);
-    setTodos(remote);
 
-    if (!syncFailed) {
+    const failedOperations = remainingQueue.filter(
+      (operation) =>
+        operation.type === 'create' ||
+        operation.type === 'update' ||
+        operation.type === 'delete',
+    );
+
+    const merged = new Map(remote.map((todo) => [todo.id, todo]));
+
+    for (const operation of failedOperations) {
+      if (operation.type === 'delete') {
+        merged.delete(operation.todo.id);
+      } else {
+        merged.set(operation.todo.id, operation.todo);
+      }
+    }
+
+    const mergedTodos = Array.from(merged.values()).sort((a, b) =>
+      a.id.localeCompare(b.id),
+    );
+
+    await replaceTodos(mergedTodos);
+    setTodos(mergedTodos);
+
+    if (syncSucceeded && remainingQueue.length === 0) {
+      setMessage(null);
+    } else if (remainingQueue.length > 0) {
+      setMessage('Neke promjene još čekaju sinkronizaciju.');
+    } else {
       setMessage(null);
     }
 
     return true;
-  } catch {
+  } catch (error) {
+    console.error('Unable to refresh todos from server:', error);
     return false;
   }
 }, [syncQueue, user]);
