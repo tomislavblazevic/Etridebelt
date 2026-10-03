@@ -396,10 +396,21 @@ const refreshFromServer = useCallback(async () => {
           </ul>
         )}
 
-        <footer className="app-footer">
-          <span>{todos.length} / {MAX_TODOS} todos</span>
-          {apiEnabled && <button type="button" className="link-button" onClick={() => void refreshFromServer()}>Sync now</button>}
-        </footer>
+     {apiEnabled && (
+  <div className="sync-action">
+    <button
+      type="button"
+      className="sync-button"
+      onClick={() => void refreshFromServer()}
+    >
+      Sync now
+    </button>
+  </div>
+)}
+
+<footer className="app-footer">
+  <span>{todos.length} / {MAX_TODOS} todos</span>
+</footer>
       </section>
     </main>
   );
