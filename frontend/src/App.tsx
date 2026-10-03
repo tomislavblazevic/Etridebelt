@@ -86,49 +86,89 @@ function App() {
     return [];
   }, []);
 
-  const syncQueue = useCallback(async () => {
-    if (!apiEnabled || !navigator.onLine) return;
-    const queue = await getQueue();
-    if (!queue.length) return;
-    setSyncing(true);
-    try {
-      for (const operation of queue) {
+const syncQueue = useCallback(async () => {
+  if (!apiEnabled || !navigator.onLine) return;
+
+  const queue = await getQueue();
+  if (!queue.length) return;
+
+  setSyncing(true);
+
+  let failed = false;
+
+  try {
+    for (const operation of queue) {
+      try {
         if (operation.type === 'create') {
           const remote = await createTodo(operation.todo);
           await deleteLocalTodo(operation.todo.id);
           await putTodo(remote);
-          setTodos((current) => current.map((todo) => todo.id === operation.todo.id ? remote : todo));
+
+          setTodos((current) =>
+            current.map((todo) =>
+              todo.id === operation.todo.id ? remote : todo,
+            ),
+          );
         } else if (operation.type === 'update') {
           const remote = await updateTodo(operation.todo);
           await putTodo(remote);
-          setTodos((current) => current.map((todo) => todo.id === remote.id ? remote : todo));
+
+          setTodos((current) =>
+            current.map((todo) =>
+              todo.id === remote.id ? remote : todo,
+            ),
+          );
         } else {
           await removeTodo(operation.todo.id);
           await deleteLocalTodo(operation.todo.id);
-          setTodos((current) => current.filter((todo) => todo.id !== operation.todo.id));
-        }
-        await removeQueueItem(operation.id);
-      }
-      setMessage(null);
-    } catch {
-      setMessage('Some offline changes are waiting for the connection to return.');
-    } finally {
-      setSyncing(false);
-    }
-  }, []);
 
-  const refreshFromServer = useCallback(async () => {
-    if (!apiEnabled || !navigator.onLine || !user) return false;
-    try {
-      await syncQueue();
-      const remote = await fetchTodos();
-      await replaceTodos(remote);
-      setTodos(remote);
-      return true;
-    } catch {
-      return false;
+          setTodos((current) =>
+            current.filter((todo) => todo.id !== operation.todo.id),
+          );
+        }
+
+        await removeQueueItem(operation.id);
+      } catch (error) {
+        failed = true;
+        console.error('Sync operation failed:', operation, error);
+      }
     }
-  }, [syncQueue, user]);
+  } finally {
+    setSyncing(false);
+  }
+
+  if (failed) {
+    setMessage('Neke promjene još čekaju sinkronizaciju.');
+  } else {
+    setMessage(null);
+  }
+}, []);
+
+const refreshFromServer = useCallback(async () => {
+  if (!apiEnabled || !navigator.onLine || !user) return false;
+
+  let syncFailed = false;
+
+  try {
+    await syncQueue();
+  } catch {
+    syncFailed = true;
+  }
+
+  try {
+    const remote = await fetchTodos();
+    await replaceTodos(remote);
+    setTodos(remote);
+
+    if (!syncFailed) {
+      setMessage(null);
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}, [syncQueue, user]);
 
   useEffect(() => {
     if (apiEnabled && !user) return;
