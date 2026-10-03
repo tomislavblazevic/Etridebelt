@@ -223,6 +223,20 @@ const refreshFromServer = useCallback(async () => {
     };
   }, [refreshFromServer]);
 
+  useEffect(() => {
+    if (!apiEnabled || !user) return;
+
+    const intervalId = window.setInterval(() => {
+      if (navigator.onLine && !syncing) {
+      void refreshFromServer();
+    }
+    }, 10_000);
+
+    return () => {
+      window.clearInterval(intervalId);
+  };
+}, [refreshFromServer, syncing, user]);
+
   const saveLocalAndQueue = async (operation: SyncOperation, nextTodos: Todo[]) => {
     await replaceTodos(nextTodos);
     setTodos(nextTodos);

@@ -58,7 +58,11 @@ export async function login(email: string, password: string): Promise<User> {
 }
 
 export async function logout(): Promise<void> { await request<void>('/auth/logout', { method: 'POST' }); csrfToken = null; }
-export async function fetchTodos(): Promise<Todo[]> { return request<Todo[]>('/todos'); }
+export async function fetchTodos(): Promise<Todo[]> {
+  return request<Todo[]>('/todos', {
+    cache: 'no-store',
+  });
+}
 export async function createTodo(todo: Todo): Promise<Todo> { return request<Todo>('/todos', { method: 'POST', body: JSON.stringify({ id: todo.id, text: todo.text, completed: todo.completed }) }); }
 export async function updateTodo(todo: Todo): Promise<Todo> { return request<Todo>(`/todos/${encodeURIComponent(todo.id)}`, { method: 'PUT', body: JSON.stringify({ text: todo.text, completed: todo.completed }) }); }
 export async function removeTodo(todoId: string): Promise<void> { await request<void>(`/todos/${encodeURIComponent(todoId)}`, { method: 'DELETE' }); }
